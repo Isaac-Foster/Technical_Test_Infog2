@@ -1,0 +1,7 @@
+.venv/
+.git/
+htmlcov
+uv.lock
+*.pyc
+*.pyo
+__pycache__/

@@ -1,0 +1,65 @@
+[project]
+name = "infog2"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "colorlog>=6.9.0",
+    "fastapi[standard]>=0.115.12",
+    "httpx[http2]>=0.28.1",
+    "playwright>=1.52.0",
+    "pre-commit>=4.2.0",
+    "psycopg2-binary>=2.9.10",
+    "pydantic>=2.11.4",
+    "sqlalchemy>=2.0.40",
+    "toml>=0.10.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+    "ruff>=0.11.8",
+    "taskipy>=1.14.1",
+    "pytest-asyncio>=0.26.0",
+]
+
+[tool.ruff]
+line-length = 79
+exclude = ["tests", ".venv", "migrations/", "*.txt", "*.pyc", "*.pyo"]
+
+
+[tool.lint]
+select = ["E", "F", "Q", "I"]
+fix = true
+unsafe-fixes = false
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.pytest.ini_options]
+addopts = "-q --disable-warnings"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "asyncio: Mark a test as asyncio test."
+]
+
+[tool.taskipy.tasks]
+run = "uvicorn src:app --reload"
+dev = "python main.py"
+
+lint = "ruff check . && ruff check . --diff"
+format = "ruff check . --fix --unsafe-fixes && ruff format ."
+
+test = "pytest --cov -vv"
+post_test = "coverage html"
+
+commi = "rm -rf ~/.cache/pre-commit/*"
+build = "docker build -t infog2 ."
+
+up = "docker compose up -d"
+down = "docker compose down"
+restart = 'docker compose down && docker compose up -d'
