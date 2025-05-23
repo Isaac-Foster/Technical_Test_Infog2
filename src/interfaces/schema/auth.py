@@ -36,7 +36,7 @@ class UserRegisterSchema(BaseModel):
             min_length=3,
             max_length=255,
         )
-    ]
+        ]
 
     email: Annotated[EmailStr, Field(description='email', max_length=256)]
     password: Annotated[
@@ -47,7 +47,7 @@ class UserRegisterSchema(BaseModel):
             min_length=8,
             max_length=256,
         ),
-    ]
+        ]
 
     document: Annotated[
         str,
@@ -58,7 +58,7 @@ class UserRegisterSchema(BaseModel):
             max_length=14,
             pattern=r'\d{3}(.)?\d{3}(.)?\d{3}(.)?\d{2}'
         ),
-    ]
+        ]
 
     roles: Annotated[
         Optional[list[RoleEnum]],
@@ -66,7 +66,7 @@ class UserRegisterSchema(BaseModel):
             default=[RoleEnum.CLIENT],
             description='regra aplicada ao usuário'
         )
-    ]
+        ]
 
     @root_validator(pre=True)
     def validate_email(cls, values):
@@ -81,7 +81,7 @@ class UserRegisterSchema(BaseModel):
         return values
 
     @root_validator(pre=True)
-    def clean_document(cls, values):
+    def clean_document_validate(cls, values):
         document = values.get('document')
         # Limpeza do CPF
         cleaned_document = re.sub(r'\D', '', document)
@@ -92,3 +92,25 @@ class UserRegisterSchema(BaseModel):
             raise ValueError("document invalid.")
         
         return values
+    
+    class Config:
+        from_attributes = True
+
+class UserLoginSchema(BaseModel):
+    email: Annotated[
+        EmailStr,
+        Field(
+            default='email@email.com',
+            description='email',
+            max_length=256,
+        )
+        ]
+    password: Annotated[
+        str,
+        Field(
+            default='P@55W0rld32@#',
+            description='senha',
+            min_length=8,
+            max_length=256,
+        ),
+        ]
