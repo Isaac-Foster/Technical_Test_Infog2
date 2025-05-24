@@ -1,31 +1,12 @@
 import re
 from typing import Annotated, Optional
-from fastapi import Body
-from pydantic import BaseModel, EmailStr, Field, root_validator, validator
+
+from pydantic import BaseModel, EmailStr, Field, root_validator
 from email_validator import validate_email, EmailNotValidError
+
 from src.infra.enums.user import RoleEnum
+from src.interfaces.validator import is_valid_document
 
-def is_valid_document(cpf: str) -> bool:
-    cpf = re.sub(r'\D', '', cpf)
-    
-    if len(cpf) != 11:
-        return False
-    
-    if cpf == cpf[0] * 11:
-        return False
-    
-    def calc_digit(cpf, weights):
-        return sum(int(cpf[i]) * weights[i] for i in range(len(weights))) % 11
-
-    weights1 = [10, 9, 8, 7, 6, 5, 4, 3, 2]
-    digit1 = calc_digit(cpf, weights1)
-    digit1 = 0 if digit1 < 2 else 11 - digit1
-
-    weights2 = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2]
-    digit2 = calc_digit(cpf, weights2)
-    digit2 = 0 if digit2 < 2 else 11 - digit2
-
-    return cpf[-2:] == f"{digit1}{digit2}"
 
 class UserRegisterSchema(BaseModel):
     name: Annotated[
@@ -35,10 +16,14 @@ class UserRegisterSchema(BaseModel):
             description='seu nome',
             min_length=3,
             max_length=255,
-        )
-        ]
+        ),
+    ]
 
-    email: Annotated[EmailStr, Field(description='email', max_length=256)]
+    email: Annotated[
+        EmailStr,
+        Field(default='email@gmail.com', description='email', max_length=256),
+    ]
+
     password: Annotated[
         str,
         Field(
@@ -47,26 +32,25 @@ class UserRegisterSchema(BaseModel):
             min_length=8,
             max_length=256,
         ),
-        ]
+    ]
 
     document: Annotated[
         str,
         Field(
-            default='123.123.123-08',
+            default='805.456.630-16',
             description='cpf',
             min_length=11,
             max_length=14,
-            pattern=r'\d{3}(.)?\d{3}(.)?\d{3}(.)?\d{2}'
+            pattern=r'\d{3}(.)?\d{3}(.)?\d{3}(.)?\d{2}',
         ),
-        ]
+    ]
 
     roles: Annotated[
         Optional[list[RoleEnum]],
         Field(
-            default=[RoleEnum.CLIENT],
-            description='regra aplicada ao usuário'
-        )
-        ]
+            default=[RoleEnum.USER], description='regra aplicada ao usuário'
+        ),
+    ]
 
     @root_validator(pre=True)
     def validate_email(cls, values):
@@ -86,25 +70,33 @@ class UserRegisterSchema(BaseModel):
         # Limpeza do CPF
         cleaned_document = re.sub(r'\D', '', document)
         values['document'] = cleaned_document
-        
+
         # Validação do CPF
         if not is_valid_document(cleaned_document):
-            raise ValueError("document invalid.")
-        
+            raise ValueError('document invalid.')
+
         return values
-    
+
     class Config:
         from_attributes = True
+
+
+class UserPublicSchema(BaseModel):
+    id: int
+    name: str
+    email: str
+    roles: list[RoleEnum]
+
 
 class UserLoginSchema(BaseModel):
     email: Annotated[
         EmailStr,
         Field(
-            default='email@email.com',
+            default='email@gmail.com',
             description='email',
             max_length=256,
-        )
-        ]
+        ),
+    ]
     password: Annotated[
         str,
         Field(
@@ -113,4 +105,12 @@ class UserLoginSchema(BaseModel):
             min_length=8,
             max_length=256,
         ),
-        ]
+    ]
+
+
+responses_register = {
+    201: {
+        'model': UserPublicSchema,
+        'description': 'User created',
+    }
+}
