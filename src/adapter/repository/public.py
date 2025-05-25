@@ -148,26 +148,25 @@ class BaseRepo(IUBaseRepoPort):
                 'results': results,
             }
 
-    def update(self, id: int, data):
+    def update(self, id: int, **kwargs):
+        print(kwargs)
         already = self.find(id=id)
         if not already:
-            raise HTTPException(
-                status_code=409, detail='email or document already exists'
-            )
+            raise HTTPException(status_code=409, detail='not')
 
         # filtranto apenas campos que não são nulos
-        data = {k: v for k, v in data.dict().items() if v is not None}
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
         # se não tiver email ou document, não precisa fazer a verificação
-        if 'email' in data or 'document' in data:
-            cop = data.copy()
+        if 'email' in kwargs or 'document' in kwargs:
+            cop = kwargs.copy()
 
             # removendo campos não unique para verificar se já existe
-            for key in data:
+            for key in kwargs:
                 if key in ['email', 'document']:
                     cop.pop(key)
 
-            already = self.find_all(**data)
+            already = self.find_all(**kwargs)
             results = already.get('results')
 
             # caso tenha apenas um resultado, verifica se é o mesmo id e retorna
@@ -180,7 +179,7 @@ class BaseRepo(IUBaseRepoPort):
 
         with self.session() as session:
             session.execute(
-                update(self.model).values(**data).where(self.model.id == id)
+                update(self.model).values(**kwargs).where(self.model.id == id)
             )
             session.commit()
         return self.find(id=id)

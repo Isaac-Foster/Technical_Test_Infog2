@@ -54,28 +54,26 @@ class ProductRepo(BaseRepo):
             return Exception('Product not found')
 
         # Verifica duplicidade (ignorando o próprio item)
-        barcode = kwargs.get("barcode")
-        name = kwargs.get("name")
+        barcode = kwargs.get('barcode')
+        name = kwargs.get('name')
         if barcode or name:
             already_results = self.find_all(barcode=barcode, name=name)
-            for item in already_results.get("results", []):
+            for item in already_results.get('results', []):
                 if item.id != id:
-                    return Exception("Product already exists")
+                    return Exception('Product already exists')
 
         with self.session.begin() as session:
             # Recupera o model real do banco
             model = session.get(self.model, id)
             if not model:
-                return Exception("Product not found in database")
+                return Exception('Product not found in database')
 
             # Atualiza apenas os campos válidos fornecidos
             for key, value in kwargs.items():
-                if hasattr(model, key) and value not in ("", None):
+                if hasattr(model, key) and value not in ('', None):
                     setattr(model, key, value)
 
             session.flush()
             session.refresh(model)
 
             return self.public.model_validate(model)
-
-
