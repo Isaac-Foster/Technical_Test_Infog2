@@ -18,7 +18,9 @@ class BaseRepo(IUBaseRepoPort):
             response = session.execute(
                 select(self.model).filter_by(**kwargs)
             ).scalar()
-        return response
+            if response:
+                return self.public.model_validate(response)
+            return None
 
     def find_all(
         self,
@@ -26,7 +28,7 @@ class BaseRepo(IUBaseRepoPort):
         limit: int = None,
         period: dict = None,
         **filters,
-        ):  # noqa
+    ):  # noqa
         with self.session() as session:
             stmt = select(self.model)
             conditions = []
@@ -34,6 +36,9 @@ class BaseRepo(IUBaseRepoPort):
             # Verifica se email e document estão nos filtros para aplicar OR
             email_value = filters.get('email')
             document_value = filters.get('document')
+
+            barcode = filters.get('barcode')
+            name = filters.get('name')
 
             if email_value and document_value:
                 # Se ambos email e document estão presentes, usa OR
@@ -51,8 +56,37 @@ class BaseRepo(IUBaseRepoPort):
                     for k, v in filters.items()
                     if k not in ['email', 'document']
                 }
-            else:
-                remaining_filters = filters
+            elif barcode and name:
+                duplicate_check_stmt = select(self.model).filter(
+                    or_(
+                        getattr(self.model, 'barcode') == barcode,
+                        getattr(self.model, 'name').ilike(f'{name}'),
+                    )
+                )
+
+                duplicate_result = (
+                    session.execute(duplicate_check_stmt).scalars().all()
+                )
+                if duplicate_result:
+                    raise HTTPException(
+                        status_code=409,
+                        detail='Another item with the same barcode or name already exists',
+                    )
+            elif barcode:
+                duplicate_check_stmt = select(self.model).filter(
+                    or_(getattr(self.model, 'barcode') == barcode)
+                )
+
+                duplicate_result = (
+                    session.execute(duplicate_check_stmt).scalars().all()
+                )
+                if duplicate_result:
+                    raise HTTPException(
+                        status_code=409,
+                        detail='Another item with the same barcode or name already exists',
+                    )
+
+            remaining_filters = filters
 
             # Aplica os demais filtros baseados nos parâmetros passados
             for key, value in remaining_filters.items():
@@ -103,7 +137,7 @@ class BaseRepo(IUBaseRepoPort):
                 stmt = stmt.offset(offset).limit(limit)
 
             results = [
-                self.public(**x.__dict__)
+                self.public.model_validate(x)
                 for x in session.execute(stmt).scalars().all()
             ]
 
@@ -118,8 +152,7 @@ class BaseRepo(IUBaseRepoPort):
         already = self.find(id=id)
         if not already:
             raise HTTPException(
-                status_code=409,
-                detail='email or document already exists'
+                status_code=409, detail='email or document already exists'
             )
 
         # filtranto apenas campos que não são nulos
@@ -135,23 +168,19 @@ class BaseRepo(IUBaseRepoPort):
                     cop.pop(key)
 
             already = self.find_all(**data)
-            results = already.get('results')  
+            results = already.get('results')
 
             # caso tenha apenas um resultado, verifica se é o mesmo id e retorna
             # caso contrário, já é um erro
             # caso tenha mais de um resultado, já é um erro
             if len(results) == 1 and results[0].id != id or len(results) > 1:
                 raise HTTPException(
-                    status_code=409,
-                    detail='email or document already exists'
+                    status_code=409, detail='email or document already exists'
                 )
-            
+
         with self.session() as session:
-            
             session.execute(
-                update(self.model).values(**data).where(
-                    self.model.id == id
-                )
+                update(self.model).values(**data).where(self.model.id == id)
             )
             session.commit()
         return self.find(id=id)
