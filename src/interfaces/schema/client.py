@@ -4,11 +4,10 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, EmailStr, Field, root_validator
 from email_validator import validate_email, EmailNotValidError
 
-from src.infra.enums.user import RoleEnum
 from src.interfaces.validator import is_valid_document
 
 
-class UserRegisterSchema(BaseModel):
+class ClientRegisterSchema(BaseModel):
     name: Annotated[
         str,
         Field(
@@ -24,7 +23,7 @@ class UserRegisterSchema(BaseModel):
         Field(default='email@gmail.com', description='email', max_length=256),
     ]
 
-    password: Annotated[
+    """ password: Annotated[
         str,
         Field(
             default='P@55W0rld32@#',
@@ -32,12 +31,12 @@ class UserRegisterSchema(BaseModel):
             min_length=8,
             max_length=256,
         ),
-    ]
+    ] """
 
     document: Annotated[
         str,
         Field(
-            default='805.456.630-16',
+            default='635.916.840-58',
             description='cpf',
             min_length=11,
             max_length=14,
@@ -45,12 +44,12 @@ class UserRegisterSchema(BaseModel):
         ),
     ]
 
-    roles: Annotated[
+    """ roles: Annotated[
         Optional[list[RoleEnum]],
         Field(
             default=[RoleEnum.USER], description='regra aplicada ao usuário'
         ),
-    ]
+    ] """
 
     @root_validator(pre=True)
     def validate_email(cls, values):
@@ -81,67 +80,36 @@ class UserRegisterSchema(BaseModel):
         from_attributes = True
 
 
-class UserPublicSchema(BaseModel):
+class ClientPublicSchema(BaseModel):
     id: int
     name: str
     email: str
-    password: str
-    roles: list[RoleEnum]
-
-    class Config:
-        from_attributes = True
-
-class UserLoginSchema(BaseModel):
-    email: Annotated[
-        EmailStr,
-        Field(
-            default='email@gmail.com',
-            description='email',
-            max_length=256,
-        ),
-    ]
-    password: Annotated[
-        str,
-        Field(
-            default='P@55W0rld32@#',
-            description='senha',
-            min_length=8,
-            max_length=256,
-        ),
-    ]
 
     class Config:
         from_attributes = True
 
 
-class UserUpdateSchema(BaseModel):
+class ClientUpdateSchema(BaseModel):
     name: Annotated[
-        str,
+        Optional[str | None],
         Field(
-            default='your name',
-            description='your complete name',
-            min_length=3,
-            max_length=255,
+            default=None, description='your name', min_length=3, max_length=255
         ),
-    ]
-
-    password: Annotated[
-        str,
+    ] = None
+    email: Annotated[
+        Optional[str | None],
+        Field(default=None, description='email', max_length=256),
+    ] = None
+    document: Annotated[
+        Optional[str | None],
         Field(
-            default='P@55W0rld32@#',
-            description='senha',
-            min_length=8,
-            max_length=256,
+            default=None,
+            description='your document -> cpf',
+            min_length=11,
+            max_length=14,
+            pattern=r'\d{3}(.)?\d{3}(.)?\d{3}(.)?\d{2}',
         ),
-    ]
-
-    roles: Annotated[
-        Optional[list[RoleEnum]],
-        Field(
-            default=[RoleEnum.USER],
-            description='rule applied to the user [ADMIN, USER]',
-        ),
-    ]
+    ] = None
 
     @root_validator(pre=True)
     def validate_email(cls, values):
@@ -155,13 +123,20 @@ class UserUpdateSchema(BaseModel):
                 raise ValueError(f'error {e}')
         return values
 
+    @root_validator(pre=True)
+    def clean_document_validate(cls, values):
+        document = values.get('document')
+        if not document:
+            return values
+        # Limpeza do CPF
+        cleaned_document = re.sub(r'\D', '', document)
+        values['document'] = cleaned_document
+
+        # Validação do CPF
+        if not is_valid_document(cleaned_document):
+            raise ValueError('document invalid.')
+
+        return values
+
     class Config:
         from_attributes = True
-
-
-responses_register = {
-    201: {
-        'model': UserPublicSchema,
-        'description': 'User created',
-    },
-}
