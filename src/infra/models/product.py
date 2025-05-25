@@ -36,7 +36,7 @@ class ProductModel:
         'ImageModel',
         back_populates='product',
         cascade='all, delete-orphan',  # Deleta imagens quando produto é deletado
-        lazy='joined',  # Carrega imagens automaticamente
+        lazy='select',  # Carrega imagens automaticamente
         init=False,  # Não incluir no __init__
         default_factory=list,  # Lista vazia por padrão
     )

@@ -27,9 +27,7 @@ class ImageModel:
 
     # Relacionamento com o ProductModel
     product: Mapped['ProductModel'] = relationship(  # noqa
-        'ProductModel', 
-        init=False,
-        back_populates='images'
+        'ProductModel', init=False, back_populates='images'
     )  # noqa
 
 
