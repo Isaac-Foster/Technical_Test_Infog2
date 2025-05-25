@@ -91,6 +91,7 @@ class UserPublicSchema(BaseModel):
     class Config:
         from_attributes = True
 
+
 class UserLoginSchema(BaseModel):
     email: Annotated[
         EmailStr,

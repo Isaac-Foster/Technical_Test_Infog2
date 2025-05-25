@@ -2,12 +2,23 @@ from typing import Optional, Annotated, Union
 from datetime import date
 from decimal import Decimal
 
-from fastapi import APIRouter, UploadFile, File, Form, Depends, Query
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+    Form,
+    Depends,
+    Query,
+    HTTPException,
+)
 
 from src.adapter.schema import ImageIn
 from src.security import get_current_user  # noqa
 from src.infra.models.user import UserModel  # noqa
-from src.interfaces.schema.product import ProducCreatetSchema, ProductUpdateSchema
+from src.interfaces.schema.product import (
+    ProducCreatetSchema,
+    ProductUpdateSchema,
+)
 from src.adapter.repository.product import ProductRepo
 from src.infra.enums.user import RoleEnum
 
@@ -39,9 +50,8 @@ async def create(
         None, description='Product images'
     ),
     repository: ProductRepo = Depends(ProductRepo),
-    # current_user: UserModel = Depends(get_current_user)
-    ):
-    
+    current_user: UserModel = Depends(get_current_user),
+):
     if RoleEnum.ADMIN not in current_user.roles:
         raise HTTPException(status_code=400, detail='Not enough permission')
 
@@ -93,7 +103,7 @@ async def find_all(
     ] = None,
     repository: ProductRepo = Depends(ProductRepo),
     current_user: UserModel = Depends(get_current_user),
-    ):
+):
     return repository.find_all(
         page=page,
         limit=limit,
@@ -108,7 +118,7 @@ async def find(
     id: int,
     repository: ProductRepo = Depends(ProductRepo),
     current_user: UserModel = Depends(get_current_user),
-    ):
+):
     return repository.find(id=id)
 
 
@@ -117,8 +127,8 @@ async def update(
     id: int,
     update: ProductUpdateSchema,
     repository: ProductRepo = Depends(ProductRepo),
-    ):
-
+    current_user: UserModel = Depends(get_current_user),
+):
     if RoleEnum.ADMIN not in current_user.roles:
         raise HTTPException(status_code=400, detail='Not enough permission')
 
@@ -129,9 +139,8 @@ async def update(
 async def delete(
     id: int,
     repository: ProductRepo = Depends(ProductRepo),
-    current_user: UserModel = Depends(get_current_user)
-    ):
-
+    current_user: UserModel = Depends(get_current_user),
+):
     if RoleEnum.ADMIN not in current_user.roles:
         raise HTTPException(status_code=400, detail='Not enough permission')
 

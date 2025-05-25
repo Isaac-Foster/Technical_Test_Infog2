@@ -83,16 +83,9 @@ class ProductSchema(BaseModel):
         from_attributes = True
 
 
-from pydantic import BaseModel, Field
-from typing import Optional, Annotated
-from decimal import Decimal
-from datetime import date
-
-
 class ProductUpdateSchema(BaseModel):
     name: Annotated[
-        Optional[str],
-        Field(default=None, description='product name')
+        Optional[str], Field(default=None, description='product name')
     ]
     price: Annotated[
         Optional[Decimal],
