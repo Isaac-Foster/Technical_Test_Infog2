@@ -1,19 +1,17 @@
-from decimal import Decimal
 from typing import List, Optional
 from datetime import datetime
-
 
 from sqlalchemy import (
     String,
     Integer,
     Numeric,
-    ARRAY,
     DateTime,
     event,
     Boolean,
 )
 
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
+
 from src.infra.database.sql import reg
 
 
@@ -25,18 +23,28 @@ class ProductModel:
         Integer, init=False, primary_key=True, autoincrement=True
     )
     name: Mapped[str] = mapped_column(String(255), index=True)
-    price: Mapped[Decimal] = mapped_column(Numeric(19, 4))
-    description: Mapped[str] = mapped_column(String(512), index=True)
-    barcode: Mapped[str] = mapped_column(String(60), unique=True, index=True)
-    section: Mapped[str] = mapped_column(String(50), index=True)
+    price: Mapped[float] = mapped_column(Numeric(19, 4))
+    description: Mapped[str] = mapped_column(String(250), index=True)
+    barcode: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    section: Mapped[str] = mapped_column(String(20), index=True)
     stock: Mapped[int] = mapped_column(Integer)
     expiration_date: Mapped[Optional[datetime]] = mapped_column(
         DateTime, nullable=True
     )
     disponibility: Mapped[bool] = mapped_column(Boolean, default=True)
-    images: Mapped[List[str]] = mapped_column(
-        ARRAY(String),
-        default=list,
+    images: Mapped[List['ImageModel']] = relationship(  # noqa
+        'ImageModel',
+        back_populates='product',
+        cascade='all, delete-orphan',  # Deleta imagens quando produto é deletado
+        lazy='joined',  # Carrega imagens automaticamente
+        init=False,  # Não incluir no __init__
+        default_factory=list,  # Lista vazia por padrão
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, init=False, default=datetime.now
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, init=False, default=datetime.now, onupdate=datetime.now
     )
 
 
