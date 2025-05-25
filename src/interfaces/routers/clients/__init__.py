@@ -62,7 +62,7 @@ async def update(
     update: ClientUpdateSchema,
     controller: ClientController = Depends(ClientController),
     current_user: UserModel = Depends(get_current_user),
-    ):
+):
     if current_user.id != id and RoleEnum.ADMIN not in current_user.roles:
         raise HTTPException(status_code=400, detail='Not enough permission')
 
@@ -71,9 +71,10 @@ async def update(
 
 @router.delete('/{id}')
 async def delete(
-    id: int, 
+    id: int,
     controller: ClientController = Depends(ClientController),
-    current_user: UserModel = Depends(get_current_user)):
+    current_user: UserModel = Depends(get_current_user),
+):
     if current_user.id != id and RoleEnum.ADMIN not in current_user.roles:
         raise HTTPException(status_code=400, detail='Not enough permission')
 
