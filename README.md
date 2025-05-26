@@ -114,7 +114,7 @@ A API implementa as seguintes funcionalidades, agrupadas por recurso:
     EXPIRATION_TIME_JWT = 30
 
     DATABASE = ''
-    DATABASE = ''
+    DATABASE_LOCAL = ''
 
     ```
 
@@ -168,7 +168,7 @@ Para rodar os testes unitários e de integração utilizando pytest:
 task test
 ```
 OBS: rodar o teste fora do deploy é necessário mudar A DB no src/infra/database/sql.py
- -> Config.DATABASE_UR para Conffig.DATABASE_TEST
+ -> Config.DATABASE para Conffig.DATABASE_LOCAL
 Certifique-se de que as configurações de banco de dados para o ambiente de teste estejam corretas (se diferente do desenvolvimento).
 
 -----
