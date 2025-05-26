@@ -12,8 +12,8 @@ class UserRegisterSchema(BaseModel):
     name: Annotated[
         str,
         Field(
-            default='your name',
-            description='seu nome',
+            default='Luan Edson Sebastião Costa',
+            description='your complete name',
             min_length=3,
             max_length=255,
         ),
@@ -28,7 +28,7 @@ class UserRegisterSchema(BaseModel):
         str,
         Field(
             default='P@55W0rld32@#',
-            description='senha',
+            description='your strong password',
             min_length=8,
             max_length=256,
         ),
@@ -38,7 +38,7 @@ class UserRegisterSchema(BaseModel):
         str,
         Field(
             default='805.456.630-16',
-            description='cpf',
+            description='your document',
             min_length=11,
             max_length=14,
             pattern=r'\d{3}(.)?\d{3}(.)?\d{3}(.)?\d{2}',
@@ -48,7 +48,8 @@ class UserRegisterSchema(BaseModel):
     roles: Annotated[
         Optional[list[RoleEnum]],
         Field(
-            default=[RoleEnum.USER], description='regra aplicada ao usuário'
+            default=[RoleEnum.USER], 
+            description='rule applied to the user [ADMIN, USER]',
         ),
     ]
 
