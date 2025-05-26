@@ -23,3 +23,15 @@ def token(client, user):
         },
     )
     return response.json()['access_token']
+
+
+@pytest.fixture
+def token_commom(client, user):
+    response = client.post(
+        '/auth/login',
+        data={
+            'username': 'email1@gmail.com', 
+            'password': 'P@55W0rld32@#'
+        },
+    )
+    return response.json()['access_token']
