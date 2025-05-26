@@ -175,20 +175,11 @@ Certifique-se de que as configurações de banco de dados para o ambiente de tes
 
 O projeto está configurado para ser executado em um container Docker.
 
-1.  **Construa a imagem Docker:**
+1.  **Construa a imagem Docker e deploy:**
 
     ```bash
-    docker build -t info-g2-api .
+    docker compose up -d .
     ```
-
-2.  **Execute o container Docker:**
-    (Certifique-se que o PostgreSQL esteja acessível para o container. Isso pode envolver rodar o PostgreSQL localmente e expô-lo, ou usar `docker-compose` para orquestrar os serviços).
-
-    ```bash
-    docker run -d -p 8000:8000 --env-file .env info-g2-api
-    ```
-
-    *Se um arquivo `docker-compose.yml` for fornecido para gerenciar o banco de dados e a API conjuntamente, o comando seria `docker-compose up -d`.*
 
 -----
 
