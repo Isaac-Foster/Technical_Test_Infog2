@@ -1,8 +1,33 @@
 services:
-  postgres:
-    image: postgres
-    container_name: infog2
-    environment:
-      POSTGRES_PASSWORD: admin
+  app:
+    build: .
+    container_name: infog2-container
     ports:
-      - 5432:5432
+      - "8000:8000"
+    environment:
+      - DATABASE=${DATABASE}  # Mantendo sua variável DATABASE
+    depends_on:
+      - postgres  # Mudei de 'db' para 'postgres'
+    networks:
+      - app-network
+
+  postgres:  # Mudei de 'db' para 'postgres'
+    image: postgres:13
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    ports:
+      - "5432:5432"  # Opcional: para acessar o DB de fora do container
+
+volumes:
+  postgres-data:
+
+networks:
+  app-network:
+    driver: bridge

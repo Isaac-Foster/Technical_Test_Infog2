@@ -9,7 +9,6 @@ dependencies = [
     "colorlog>=6.9.0",
     "fastapi[standard]>=0.115.12",
     "httpx[http2]>=0.28.1",
-    "playwright>=1.52.0",
     "pre-commit>=4.2.0",
     "psycopg2-binary>=2.9.10",
     "pydantic>=2.11.4",
@@ -53,7 +52,7 @@ markers = [
 ]
 
 [tool.taskipy.tasks]
-run = "uvicorn src:app --reload"
+run = "uvicorn src:app --host 0.0.0.0 --port 8000 --reload"
 dev = "python main.py"
 
 lint = "ruff check . && ruff check . --diff"
@@ -64,7 +63,3 @@ post_test = "coverage html"
 
 commi = "rm -rf ~/.cache/pre-commit/*"
 build = "docker build -t infog2 ."
-
-up = "docker compose up -d"
-down = "docker compose down"
-restart = 'docker compose down && docker compose up -d'
