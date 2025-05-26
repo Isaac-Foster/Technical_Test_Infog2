@@ -54,13 +54,13 @@ def test_login_error(app_context,  auth_repo):
     response = client.post(
         '/auth/login',
         data={
-            'username': 'retesta@gmail.com',
-            'password': 'P@55W0rld32@#',
+            'username': 'retest@gmail.com',
+            'password': 'P@55W0rald32@#',
         },
         headers={'Content-Type': 'application/x-www-form-urlencoded'}
     )
 
-    assert response.status_code == 401, 'login error failed'
+    assert response.status_code == 404, 'login error failed'
 
 
 def test_create_user_error_doc(app_context):

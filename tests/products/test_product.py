@@ -1,0 +1,10 @@
+import pytest
+
+def test_find_all(app_context, token_commom):
+    client = app_context
+    response = client.get(
+        '/products',
+        headers={'Authorization': f'Bearer {token_commom}'},
+    )
+
+    assert response.status_code == 200, 'passed email invalid'

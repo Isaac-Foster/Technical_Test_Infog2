@@ -16,6 +16,23 @@ def auth_repo():
 @pytest.fixture
 def token(app_context):
     client = app_context
+
+    try:
+        client.post(
+        '/auth/register',
+        json={
+            "name": "ivan drago",
+            "email": "email@gmail.com",
+            "password": "P@55W0rld32@#",
+            "document": "986.309.100-62",
+            "roles": [
+                "ADMIN"
+            ]
+        },
+    )
+    except:
+        pass
+    
     response = client.post(
         '/auth/login',
         data={
@@ -28,6 +45,21 @@ def token(app_context):
 
 @pytest.fixture
 def token_commom(app_context):
+    try:
+        client.post(
+        '/auth/register',
+        json={
+            "name": "ivan drago",
+            "email": "email1@gmail.com",
+            "password": "P@55W0rld32@#",
+            "document": "56620484018",
+            "roles": [
+                "USER"
+            ]
+        },
+    )
+    except:
+        pass
     client = app_context
     response = client.post(
         '/auth/login',
