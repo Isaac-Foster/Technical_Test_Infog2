@@ -16,7 +16,8 @@ async def login(
 ):
     try:
         data = UserLoginSchema(
-            email=form_data.username, password=form_data.password
+            email=form_data.username, 
+            password=form_data.password
         )
     except Exception as e:
         return Response(
