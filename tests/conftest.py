@@ -14,7 +14,8 @@ def auth_repo():
 
 
 @pytest.fixture
-def token(client, user):
+def token(app_context):
+    client = app_context
     response = client.post(
         '/auth/login',
         data={
@@ -26,7 +27,8 @@ def token(client, user):
 
 
 @pytest.fixture
-def token_commom(client, user):
+def token_commom(app_context):
+    client = app_context
     response = client.post(
         '/auth/login',
         data={
