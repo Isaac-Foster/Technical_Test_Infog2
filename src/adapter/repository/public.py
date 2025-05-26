@@ -20,7 +20,11 @@ class BaseRepo(IUBaseRepoPort):
             ).scalar()
             if response:
                 return self.public.model_validate(response)
-            return None
+
+            raise HTTPException(
+                status_code=404, 
+                detail='resource not found'
+                )
 
     def find_all(
         self,
@@ -149,10 +153,12 @@ class BaseRepo(IUBaseRepoPort):
             }
 
     def update(self, id: int, **kwargs):
-        print(kwargs)
         already = self.find(id=id)
+
         if not already:
-            raise HTTPException(status_code=409, detail='not')
+            raise HTTPException(
+                status_code=404, detail='resource not found'
+                )
 
         # filtranto apenas campos que não são nulos
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -188,7 +194,9 @@ class BaseRepo(IUBaseRepoPort):
         already = self.find(**kwargs)
 
         if not already:
-            raise Exception('user not found')
+            raise HTTPException(
+                status_code=404, detail='resource not found'
+                )
 
         with self.session() as session:
             try:
@@ -196,5 +204,8 @@ class BaseRepo(IUBaseRepoPort):
                 session.commit()
                 return already
             except Exception as e:
-                print(e)
-                return False
+                session.rollback()
+                raise HTTPException(
+                    status_code=500, 
+                    detail=str(e)
+                )
