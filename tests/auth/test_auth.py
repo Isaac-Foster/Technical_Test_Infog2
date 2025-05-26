@@ -49,4 +49,4 @@ def test_login(app_context,  auth_repo):
 
     deleted = auth_repo.delete(email='retest@gmail.com')
     assert response.status_code == 200, 'login failed'
-    assert deleted is True, 'user not deleted'
+    assert isinstance(deleted, auth_repo.public), 'user not deleted'
