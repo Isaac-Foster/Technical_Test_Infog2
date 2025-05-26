@@ -4,12 +4,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infra.database.sql import reg
 from src.infra.models.product import ProductModel
-from src.infra.models.order import OrderModel
 
 
 @reg.mapped_as_dataclass
 class OrderItemModel:
     __tablename__ = 'order_items'
+    __mapper_args__ = {"confirm_deleted_rows": False}
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, init=False, autoincrement=True
@@ -68,7 +68,7 @@ def check_and_decrement_stock(mapper, connection, target: OrderItemModel):
 @event.listens_for(OrderItemModel, 'before_delete')
 def restore_stock_on_delete(mapper, connection, target: OrderItemModel):
     product_table = ProductModel.__table__
-    order_table = OrderModel.__table__
+    order_table = reg.metadata.tables['orders']
 
     # Busca o pedido para verificar status
     order_stmt = select(order_table.c.status).where(

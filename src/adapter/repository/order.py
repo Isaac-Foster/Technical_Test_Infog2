@@ -1,4 +1,4 @@
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, delete
 from sqlalchemy.orm import selectinload
 
 from src.infra.models.order import OrderModel
@@ -105,3 +105,39 @@ class OrderRepo(BaseRepo):
                 self.public.model_validate(order, from_attributes=True)
                 for order in result
             ]
+
+    def delete(self, **kwargs):
+        already = self.find(**kwargs)
+
+        if not already:
+            raise Exception('order not found')
+
+        with self.session() as session:
+            try:
+                # Busca o pedido com os itens
+                order = (
+                    session.query(self.model)
+                    .options(selectinload(self.model.items))
+                    .filter_by(**kwargs)
+                    .first()
+                )
+
+                #print(order)
+
+                if not order:
+                    raise Exception('order not found in DB')
+
+                # Deleta itens um por um para ativar o listener
+                for item in order.items:
+                    ##print(item)
+                    session.delete(item)
+                    session.flush()
+
+                # Deleta o pedido
+                session.execute(delete(self.model).filter_by(id=order.id))
+                session.commit()
+
+                return already  # retorna os dados validados do pedido já coletados
+            except Exception as e:
+                print(e)
+                return False
