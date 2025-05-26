@@ -101,7 +101,7 @@ A API implementa as seguintes funcionalidades, agrupadas por recurso:
 3.  **Instale as dependências:**
 
     ```bash
-    pip install -r requirements.txt
+    uv sync
     ```
 
 4.  **Configure as variáveis de ambiente:**
@@ -113,6 +113,7 @@ A API implementa as seguintes funcionalidades, agrupadas por recurso:
     ALGORITHM_JWT = 'HS256'
     EXPIRATION_TIME_JWT = 30
 
+    DATABASE = ''
     DATABASE = ''
 
     ```
@@ -137,7 +138,7 @@ A API implementa as seguintes funcionalidades, agrupadas por recurso:
 Para iniciar o servidor FastAPI (com recarregamento automático durante o desenvolvimento):
 
 ```bash
-uvicorn main:app --reload
+task run
 ```
 
 A API estará disponível em `http://127.0.0.1:8000`.
@@ -164,9 +165,10 @@ A documentação inclui:
 Para rodar os testes unitários e de integração utilizando pytest:
 
 ```bash
-pytest
+task test
 ```
-
+OBS: rodar o teste fora do deploy é necessário mudar A DB no src/infra/database/sql.py
+ -> Config.DATABASE_UR para Conffig.DATABASE_TEST
 Certifique-se de que as configurações de banco de dados para o ambiente de teste estejam corretas (se diferente do desenvolvimento).
 
 -----

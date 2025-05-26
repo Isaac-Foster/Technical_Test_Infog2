@@ -24,6 +24,17 @@ services:
       - app-network
     ports:
       - "5432:5432"  # Opcional: para acessar o DB de fora do container
+  local:  # Mudei de 'db' para 'postgres'
+    image: postgres:13
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    networks:
+      - app-network
+    ports:
+      - "5433:5432"  # Opcional: para acessar o DB de fora do container
 
 volumes:
   postgres-data:

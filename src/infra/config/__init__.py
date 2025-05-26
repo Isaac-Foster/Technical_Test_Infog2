@@ -12,3 +12,4 @@ class Config:
     ALGORITHM_JWT = getenv('ALGORITHM_JWT')
     EXPIRATION_TIME_JWT = int(getenv('EXPIRATION_TIME_JWT'))
     DATABASE = getenv('DATABASE')
+    DATABASE_LOCAL = getenv('DATABASE_LOCAL')
