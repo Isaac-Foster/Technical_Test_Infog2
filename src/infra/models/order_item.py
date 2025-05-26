@@ -9,7 +9,7 @@ from src.infra.models.product import ProductModel
 @reg.mapped_as_dataclass
 class OrderItemModel:
     __tablename__ = 'order_items'
-    __mapper_args__ = {"confirm_deleted_rows": False}
+    __mapper_args__ = {'confirm_deleted_rows': False}
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, init=False, autoincrement=True
